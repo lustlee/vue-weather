@@ -5,11 +5,11 @@ import { API_KEY } from '@/constants/index.js';
 import { onMounted, ref } from 'vue';
 import axiosApi from '@/axiosApi.js';
 
-const city = ref('Paris');
+const city = ref('Bishkek');
 const weatherInfo = ref(null);
 
 const getWeather = async () => {
-  const res = await axiosApi.get(`?q=${city.value}&appid=${API_KEY}`);
+  const res = await axiosApi.get(`?q=${city.value}&units=metric&appid=${API_KEY}`);
   weatherInfo.value = res.data
 }
 
@@ -34,7 +34,7 @@ onMounted( () => {
                       class="search"
                   />
                 </div>
-                <WeatherSummary/>
+                <WeatherSummary :weatherInfo="weatherInfo" />
               </div>
             </section>
             <section class="section section-right">
