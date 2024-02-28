@@ -25,7 +25,7 @@ onMounted( () => {
         <div class="laptop">
           <div class="sections">
             <section class="section section-left">
-              <div class="info">
+              <div class="info" v-auto-animate>
                 <div class="city-inner">
                   <input
                       v-model="city"
