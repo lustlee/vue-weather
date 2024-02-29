@@ -2,22 +2,24 @@
 import WeatherSummary from './components/WeatherSummary.vue';
 import Highlights from '@/components/Highlights.vue';
 import { API_KEY } from '@/constants/index.js';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import axiosApi from '@/axiosApi.js';
 import Coords from '@/components/Coords.vue';
 import Humidity from '@/components/Humidity.vue';
+import { capitalizeFirstLetter } from '@/utils/index.js';
 
-const city = ref('Bishkek');
+const city = ref('Paris');
 const weatherInfo = ref(null);
-
+const isError = computed(() => weatherInfo.value?.cod !== 200);
 const getWeather = async () => {
-  const res = await axiosApi.get(`?q=${city.value}&units=metric&appid=${API_KEY}`);
-  weatherInfo.value = res.data
+  const response = await axiosApi.get(`?q=${city.value}&units=metric&appid=${API_KEY}`);
+  weatherInfo.value = response.data
 }
 
 onMounted( () => {
   getWeather();
 });
+
 </script>
 
 <template>
@@ -26,7 +28,7 @@ onMounted( () => {
       <div class="container">
         <div class="laptop">
           <div class="sections">
-            <section class="section section-left">
+            <section :class="['section', 'section-left', {'section-error': isError}]">
               <div class="info" v-auto-animate>
                 <div class="city-inner">
                   <input
@@ -36,14 +38,22 @@ onMounted( () => {
                       class="search"
                   />
                 </div>
-                <WeatherSummary :weatherInfo="weatherInfo" />
+                <WeatherSummary v-if="!isError" :weatherInfo="weatherInfo" />
+                <div v-else class="error">
+                  <div class="error-title">
+                    Ooooops! Something went wrong
+                  </div>
+                  <div v-if="weatherInfo?.message" class="error-message">
+                    {{ capitalizeFirstLetter(weatherInfo?.message) }}
+                  </div>
+                </div>
               </div>
             </section>
-            <section class="section section-right" v-auto-animate>
+            <section v-if="!isError" class="section section-right" v-auto-animate>
               <Highlights :weatherInfo="weatherInfo"/>
             </section>
           </div>
-          <div v-if="weatherInfo?.weather" class="sections" v-auto-animate>
+          <div v-if="!isError" class="sections" v-auto-animate>
             <Coords :coord="weatherInfo.coord" />
             <Humidity :humidity="weatherInfo.main.humidity" />
           </div>
@@ -88,6 +98,11 @@ onMounted( () => {
 
   @media (max-width: 767px) {
     width: 100%;
+    padding-right: 0;
+  }
+  &.section-error {
+    min-width: 235px;
+    width: auto;
     padding-right: 0;
   }
 }
@@ -148,6 +163,19 @@ onMounted( () => {
 
   @media (max-width: 767px) {
     width: 100%;
+  }
+}
+
+.error {
+  padding-top: 20px;
+
+  &-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  &-message {
+    padding-top: 18px;
   }
 }
 </style>
